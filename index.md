@@ -1,6 +1,6 @@
 I'm Jamie Martin.
 
- ![](jamie-cartoon.jpg)
+ ![Cartoon of Jamie](jamie-cartoon.jpg)
 
  [https://www.linkedin.com/in/jcmexplains](https://www.linkedin.com/in/jcmexplains/)
 
