@@ -1,4 +1,8 @@
-I'm Jamie Martin. [https://www.linkedin.com/in/jcmexplains](https://www.linkedin.com/in/jcmexplains/)
+I'm Jamie Martin.
+
+[](jamie-cartoon.jpg)
+
+ [https://www.linkedin.com/in/jcmexplains](https://www.linkedin.com/in/jcmexplains/)
 
 I've taught English at a community college for the past ten years, and here are some projects I've worked on:
 
