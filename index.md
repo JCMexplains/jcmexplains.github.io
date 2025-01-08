@@ -1,4 +1,4 @@
-I'm Jamie Martin.
+# Jamie Martin
 
  ![Cartoon of Jamie](jamie-cartoon.jpg)
 
