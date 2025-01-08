@@ -1,1 +1,18 @@
- 
+---
+---
+
+@font-face {
+  font-family: 'TAYBigBirdRegular';
+  src: url('../fonts/TAYBigBirdRegular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+a {
+  font-family: 'TAYBigBirdRegular', sans-serif;
+  color: red !important; /* This is just to test if CSS is working */
+}
+
+body {
+  background-color: #f0f0f0;
+} 
