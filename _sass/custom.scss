@@ -14,6 +14,18 @@ body {
   padding: 2rem;
 }
 
+.site-header {
+  border-bottom: 1px solid #e8e8e8;
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+}
+
+.site-title {
+  font-family: 'TAYBigBirdRegular', sans-serif;
+  font-size: 2.5rem;
+  margin: 0;
+}
+
 a {
   font-family: 'TAYBigBirdRegular', sans-serif;
   text-decoration: none;
