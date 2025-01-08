@@ -1,4 +1,4 @@
-![Cartoon of Jamie](jamie-cartoon.jpg)
+![Cartoon of me by Jason Adam Katzenstein](jamie-cartoon.jpg)
 
 [https://www.linkedin.com/in/jcmexplains](https://www.linkedin.com/in/jcmexplains/)
 
