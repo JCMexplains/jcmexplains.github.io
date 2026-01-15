@@ -1,4 +1,4 @@
-// Custom styles
+// Custom styles - Warm Educator
 @font-face {
   font-family: 'TAYBigBirdRegular';
   src: url('../assets/fonts/TAYBigBirdRegular.woff2') format('woff2');
@@ -8,33 +8,61 @@
 
 body {
   font-family: system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
+  line-height: 1.65;
   margin: 0 auto;
-  max-width: 800px;
-  padding: 2rem;
+  max-width: 720px;
+  padding: 2.5rem 2rem;
+  color: #2d2d2d;
+  background: #fffef9;
 }
 
 .site-header {
-  border-bottom: 1px solid #e8e8e8;
-  padding: 1rem 0;
-  margin-bottom: 2rem;
+  border: none;
+  padding: 0 0 2rem 0;
+  margin-bottom: 2.5rem;
 }
 
 .site-title {
   font-family: 'TAYBigBirdRegular', sans-serif;
-  font-size: 2.5rem;
+  font-size: 2.6rem;
   margin: 0;
+  color: #d97706;
+  letter-spacing: -0.01em;
 }
 
 a {
   font-family: 'TAYBigBirdRegular', sans-serif;
+  color: #ea580c;
   text-decoration: none;
+  transition: color 0.2s;
+
   &:hover {
-    text-decoration: underline;
+    color: #c2410c;
+    text-decoration: none;
   }
 }
 
 img {
   max-width: 100%;
   height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+ul {
+  list-style: none;
+  padding-left: 0;
+
+  li {
+    padding-left: 1.5rem;
+    position: relative;
+    margin: 0.8rem 0;
+
+    &:before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: #ea580c;
+    }
+  }
 } 
