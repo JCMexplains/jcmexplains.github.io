@@ -1,4 +1,4 @@
-![Cartoon of me by Jason Adam Katzenstein](jamie-cartoon.jpg)
+![Cartoon of me by Jason Adam Katzenstein](jamie-cartoon.jpg "Cartoon of me by Jason Adam Katzenstein")
 
 [https://www.linkedin.com/in/jcmexplains](https://www.linkedin.com/in/jcmexplains/)
 
@@ -10,4 +10,4 @@ I've taught English at a community college for the past ten years, and here are 
 
 I would have struggled to finish my PhD without the help of [Zotero](https://www.zotero.org/), the free reference manager that I used to manage my bibliography. If you work on any large project where citations move in and out, I highly recommend it.
 
-![Zotero logo](zotero-logo-128x31.png)
+![Zotero logo](zotero-logo-128x31.png "Zotero logo")
