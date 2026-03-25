@@ -135,13 +135,13 @@ const App = (() => {
     }
 
     /**
-     * Crop out Balatro's UI-relevant regions and compress.
-     * Balatro layout (portrait phone screenshot):
-     *   Top ~15%: Blind info, ante, round
-     *   ~15-30%: Joker slots
-     *   ~55-75%: Hand cards
-     *   ~75-90%: Hands/discards remaining, play/discard buttons
-     * We crop out the middle dead space (~30-55%) which is just the table felt.
+     * Crop out Balatro's dead space and compress.
+     * Balatro landscape layout (iPhone):
+     *   Left ~20%: Blind info, score, ante
+     *   ~20-35%: Joker slots + consumables (vertical stack)
+     *   ~35-65%: Table felt (mostly empty)
+     *   ~55-100%: Hand cards at bottom, play/discard buttons at right
+     * We detect orientation and crop accordingly.
      */
     function compressImage(dataUrl, callback) {
         const MAX_BYTES = 4.5 * 1024 * 1024;
@@ -150,34 +150,52 @@ const App = (() => {
             const { width, height } = img;
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
+            const isLandscape = width > height;
 
-            // Crop into two strips: top UI (0-35%) and bottom UI (50-100%)
-            // then stitch them together vertically
-            const topEnd = Math.round(height * 0.35);
-            const bottomStart = Math.round(height * 0.48);
-            const bottomHeight = height - bottomStart;
-            const croppedHeight = topEnd + bottomHeight;
+            if (isLandscape) {
+                // Landscape: crop out the empty center of the table
+                // Left strip: blind info + jokers (0-40% of width)
+                // Right strip: hand area + buttons (55-100% of width)
+                const leftEnd = Math.round(width * 0.40);
+                const rightStart = Math.round(width * 0.50);
+                const rightWidth = width - rightStart;
+                const croppedWidth = leftEnd + rightWidth;
 
-            canvas.width = width;
-            canvas.height = croppedHeight;
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
+                canvas.width = croppedWidth;
+                canvas.height = height;
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
 
-            // Draw top strip (blind info + jokers)
-            ctx.drawImage(img, 0, 0, width, topEnd, 0, 0, width, topEnd);
-            // Draw bottom strip (hand + buttons)
-            ctx.drawImage(img, 0, bottomStart, width, bottomHeight, 0, topEnd, width, bottomHeight);
+                // Draw left strip (blind, jokers, consumables)
+                ctx.drawImage(img, 0, 0, leftEnd, height, 0, 0, leftEnd, height);
+                // Draw right strip (hand cards, buttons)
+                ctx.drawImage(img, rightStart, 0, rightWidth, height, leftEnd, 0, rightWidth, height);
+            } else {
+                // Portrait: crop out the empty middle
+                const topEnd = Math.round(height * 0.35);
+                const bottomStart = Math.round(height * 0.48);
+                const bottomHeight = height - bottomStart;
+                const croppedHeight = topEnd + bottomHeight;
 
-            // Now scale down if still too large
+                canvas.width = width;
+                canvas.height = croppedHeight;
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+
+                ctx.drawImage(img, 0, 0, width, topEnd, 0, 0, width, topEnd);
+                ctx.drawImage(img, 0, bottomStart, width, bottomHeight, 0, topEnd, width, bottomHeight);
+            }
+
+            // Scale down if still too large
             let maxDim = 2400;
             let quality = 0.90;
 
             function tryCompress() {
                 const outCanvas = document.createElement('canvas');
                 const outCtx = outCanvas.getContext('2d');
-                const scale = Math.min(1, maxDim / Math.max(canvas.width, croppedHeight));
+                const scale = Math.min(1, maxDim / Math.max(canvas.width, canvas.height));
                 outCanvas.width = Math.round(canvas.width * scale);
-                outCanvas.height = Math.round(croppedHeight * scale);
+                outCanvas.height = Math.round(canvas.height * scale);
                 outCtx.imageSmoothingEnabled = true;
                 outCtx.imageSmoothingQuality = 'high';
                 outCtx.drawImage(canvas, 0, 0, outCanvas.width, outCanvas.height);
@@ -258,14 +276,14 @@ Before doing ANY analysis, carefully identify every card in the hand. Balatro ca
 - Look at EACH card individually. Do not guess — zoom in mentally on each card's corner rank and suit
 - Double-check: if you see what looks like a 6, make sure it's not a 9 (and vice versa). If a face looks like Q, confirm it's not K or J.
 
-NOTE: The image has been pre-cropped to remove the empty table area in the middle. The top portion shows blind info and jokers. The bottom portion shows the hand cards and action buttons. They are stitched together — don't be confused by the seam.
+NOTE: The image has been pre-cropped to remove the empty table felt. The two halves are stitched together — don't be confused by the seam. In landscape mode (most common): left side has blind info, jokers, and consumables; right side has hand cards and action buttons. In portrait mode: top has blind/jokers, bottom has hand/buttons.
 
 STEP 2 — READ GAME STATE:
-- Blind name and chip target (top area)
+- Blind name and chip target (left side in landscape, top in portrait)
 - Current chip score so far this round
 - Hands remaining and Discards remaining (near the action buttons, usually blue and red numbers)
 - Money ($) amount
-- Jokers in the joker slots (top portion) — read each joker name carefully
+- Jokers in the joker slots — read each joker name carefully
 - Any consumables (tarot/planet/spectral cards) in the consumable slots
 
 STEP 3 — ANALYZE:
