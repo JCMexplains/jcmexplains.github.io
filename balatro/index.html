@@ -62,10 +62,14 @@ layout: null
             </div>
         </section>
 
-        <!-- Game State Display -->
+        <!-- Game State Verification -->
         <section id="game-state-section" class="card hidden">
-            <h2>Game State</h2>
+            <h2>Verify Game State</h2>
+            <p class="hint">Tap any card to fix misreads, then hit Analyze.</p>
             <div id="game-state-display"></div>
+            <div id="verify-actions" class="hidden">
+                <button id="run-analysis-btn" class="btn btn-primary">Analyze This Hand</button>
+            </div>
         </section>
 
         <!-- Recommendation -->
@@ -73,6 +77,32 @@ layout: null
             <h2>Recommended Play</h2>
             <div id="recommendation-display"></div>
         </section>
+
+        <!-- Card Edit Modal -->
+        <div id="card-edit-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Edit Card</h3>
+                <div class="edit-ranks">
+                    <button data-rank="A">A</button><button data-rank="K">K</button>
+                    <button data-rank="Q">Q</button><button data-rank="J">J</button>
+                    <button data-rank="10">10</button><button data-rank="9">9</button>
+                    <button data-rank="8">8</button><button data-rank="7">7</button>
+                    <button data-rank="6">6</button><button data-rank="5">5</button>
+                    <button data-rank="4">4</button><button data-rank="3">3</button>
+                    <button data-rank="2">2</button>
+                </div>
+                <div class="edit-suits">
+                    <button data-suit="Spades" class="suit-black">♠</button>
+                    <button data-suit="Hearts" class="suit-red">♥</button>
+                    <button data-suit="Diamonds" class="suit-red">♦</button>
+                    <button data-suit="Clubs" class="suit-black">♣</button>
+                </div>
+                <div class="modal-actions">
+                    <button id="modal-save" class="btn btn-primary">Save</button>
+                    <button id="modal-cancel" class="btn btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
 
         <!-- Hand History -->
         <section id="history-section" class="card hidden">

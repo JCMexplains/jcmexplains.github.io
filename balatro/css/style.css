@@ -610,6 +610,131 @@ footer a:hover {
     }
 }
 
+/* Editable cards */
+.card-display.editable {
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.card-display.editable:hover,
+.card-display.editable:active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.card-display.uncertain {
+    border-style: dashed;
+    animation: pulse-uncertain 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-uncertain {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.edit-hint {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    font-weight: 400;
+}
+
+.confidence-note {
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 8px;
+}
+
+.confidence-note p {
+    font-size: 0.8rem;
+    color: var(--accent-gold);
+    margin: 0;
+}
+
+#verify-actions {
+    margin-top: 1rem;
+}
+
+/* Card edit modal */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    padding: 1rem;
+}
+
+.modal-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    width: 100%;
+    max-width: 320px;
+}
+
+.modal-content h3 {
+    margin: 0 0 0.75rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    text-transform: none;
+}
+
+.edit-ranks,
+.edit-suits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+}
+
+.edit-ranks button,
+.edit-suits button {
+    background: var(--bg-dark);
+    border: 2px solid var(--border);
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 0.5rem 0.65rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-width: 40px;
+    text-align: center;
+    transition: all 0.1s;
+}
+
+.edit-ranks button.selected {
+    border-color: var(--accent-blue);
+    background: rgba(96, 165, 250, 0.15);
+    color: var(--accent-blue);
+}
+
+.edit-suits button {
+    font-size: 1.4rem;
+    padding: 0.4rem 0.75rem;
+}
+
+.edit-suits button.selected {
+    border-color: var(--accent-gold);
+    background: rgba(251, 191, 36, 0.15);
+}
+
+.suit-red { color: var(--accent-red); }
+.suit-black { color: var(--text-primary); }
+
+.modal-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.modal-actions .btn {
+    flex: 1;
+}
+
 /* Prevent zoom on iOS */
 input, select, textarea {
     font-size: 16px;
