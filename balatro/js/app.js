@@ -135,43 +135,60 @@ const App = (() => {
     }
 
     /**
-     * Compress image to stay under the Claude API 5MB base64 limit.
-     * Uses canvas to resize and re-encode as JPEG.
+     * Crop out Balatro's UI-relevant regions and compress.
+     * Balatro layout (portrait phone screenshot):
+     *   Top ~15%: Blind info, ante, round
+     *   ~15-30%: Joker slots
+     *   ~55-75%: Hand cards
+     *   ~75-90%: Hands/discards remaining, play/discard buttons
+     * We crop out the middle dead space (~30-55%) which is just the table felt.
      */
     function compressImage(dataUrl, callback) {
-        const MAX_BYTES = 4.5 * 1024 * 1024; // 4.5MB to leave headroom
+        const MAX_BYTES = 4.5 * 1024 * 1024;
         const img = new Image();
         img.onload = () => {
-            // Check if already small enough
-            const base64Part = dataUrl.split(',')[1] || '';
-            if (base64Part.length * 0.75 <= MAX_BYTES) {
-                callback(dataUrl);
-                return;
-            }
-
+            const { width, height } = img;
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            let { width, height } = img;
 
-            // Scale down until it fits, starting at 2000px max dimension
-            let maxDim = 2000;
-            let quality = 0.85;
-            let result = dataUrl;
+            // Crop into two strips: top UI (0-35%) and bottom UI (50-100%)
+            // then stitch them together vertically
+            const topEnd = Math.round(height * 0.35);
+            const bottomStart = Math.round(height * 0.48);
+            const bottomHeight = height - bottomStart;
+            const croppedHeight = topEnd + bottomHeight;
+
+            canvas.width = width;
+            canvas.height = croppedHeight;
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+
+            // Draw top strip (blind info + jokers)
+            ctx.drawImage(img, 0, 0, width, topEnd, 0, 0, width, topEnd);
+            // Draw bottom strip (hand + buttons)
+            ctx.drawImage(img, 0, bottomStart, width, bottomHeight, 0, topEnd, width, bottomHeight);
+
+            // Now scale down if still too large
+            let maxDim = 2400;
+            let quality = 0.90;
 
             function tryCompress() {
-                const scale = Math.min(1, maxDim / Math.max(width, height));
-                canvas.width = Math.round(width * scale);
-                canvas.height = Math.round(height * scale);
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                result = canvas.toDataURL('image/jpeg', quality);
+                const outCanvas = document.createElement('canvas');
+                const outCtx = outCanvas.getContext('2d');
+                const scale = Math.min(1, maxDim / Math.max(canvas.width, croppedHeight));
+                outCanvas.width = Math.round(canvas.width * scale);
+                outCanvas.height = Math.round(croppedHeight * scale);
+                outCtx.imageSmoothingEnabled = true;
+                outCtx.imageSmoothingQuality = 'high';
+                outCtx.drawImage(canvas, 0, 0, outCanvas.width, outCanvas.height);
+                const result = outCanvas.toDataURL('image/jpeg', quality);
 
                 const b64 = result.split(',')[1] || '';
-                if (b64.length * 0.75 <= MAX_BYTES || maxDim <= 800) {
+                if (b64.length * 0.75 <= MAX_BYTES || maxDim <= 1000) {
                     callback(result);
                 } else {
-                    // Try smaller
-                    maxDim -= 300;
-                    quality = Math.max(0.6, quality - 0.05);
+                    maxDim -= 200;
+                    quality = Math.max(0.7, quality - 0.03);
                     tryCompress();
                 }
             }
@@ -231,16 +248,31 @@ const App = (() => {
 
         const systemPrompt = `You are a Balatro game analyzer. You will be given a screenshot from Balatro (a roguelike poker deck-builder game).
 
-Your job:
-1. Parse the COMPLETE game state visible in the screenshot
-2. Identify ALL possible hands that can be played from the current cards
-3. Calculate expected scores considering jokers, hand levels, and card enhancements
-4. Recommend the OPTIMAL play with clear reasoning
+STEP 1 — READ CARDS CAREFULLY:
+Before doing ANY analysis, carefully identify every card in the hand. Balatro cards show:
+- The RANK in the top-left and bottom-right corners (2,3,4,5,6,7,8,9,10,J,Q,K,A)
+- The SUIT symbol: Hearts (red ♥), Diamonds (red ♦), Clubs (black ♣), Spades (black ♠)
+- Face cards (J/Q/K) have distinctive artwork — J has a young face, Q has a queen, K has a king with crown
+- Cards are arranged left to right in the hand area at the bottom of the screen
+- Count the cards — a standard Balatro hand has 8 cards (can vary with certain jokers/vouchers)
+- Look at EACH card individually. Do not guess — zoom in mentally on each card's corner rank and suit
+- Double-check: if you see what looks like a 6, make sure it's not a 9 (and vice versa). If a face looks like Q, confirm it's not K or J.
 
-IMPORTANT RULES FOR ANALYSIS:
-- Consider joker effects and their interactions carefully
-- Factor in remaining hands and discards when recommending plays
-- Consider the blind target - sometimes a "worse" hand that beats the blind is better than fishing for a "better" hand
+NOTE: The image has been pre-cropped to remove the empty table area in the middle. The top portion shows blind info and jokers. The bottom portion shows the hand cards and action buttons. They are stitched together — don't be confused by the seam.
+
+STEP 2 — READ GAME STATE:
+- Blind name and chip target (top area)
+- Current chip score so far this round
+- Hands remaining and Discards remaining (near the action buttons, usually blue and red numbers)
+- Money ($) amount
+- Jokers in the joker slots (top portion) — read each joker name carefully
+- Any consumables (tarot/planet/spectral cards) in the consumable slots
+
+STEP 3 — ANALYZE:
+- Identify ALL possible poker hands from the cards
+- Calculate expected scores considering joker effects and hand levels
+- Consider the blind target and remaining hands/discards
+- Sometimes a "worse" hand that beats the blind is better than fishing for a "better" hand
 - If discards remain, consider what discarding could lead to
 - Account for hand levels (planet card upgrades)
 - Note card enhancements (bonus, mult, wild, glass, steel, stone, gold, lucky), editions (foil, holographic, polychrome), and seals (gold, red, blue, purple)
