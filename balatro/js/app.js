@@ -123,13 +123,61 @@ const App = (() => {
     function loadImage(file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-            currentImage = e.target.result;
-            els.previewImage.src = currentImage;
-            els.previewImage.classList.remove('hidden');
-            els.dropZoneContent.classList.add('hidden');
-            els.uploadActions.classList.remove('hidden');
+            compressImage(e.target.result, (compressed) => {
+                currentImage = compressed;
+                els.previewImage.src = currentImage;
+                els.previewImage.classList.remove('hidden');
+                els.dropZoneContent.classList.add('hidden');
+                els.uploadActions.classList.remove('hidden');
+            });
         };
         reader.readAsDataURL(file);
+    }
+
+    /**
+     * Compress image to stay under the Claude API 5MB base64 limit.
+     * Uses canvas to resize and re-encode as JPEG.
+     */
+    function compressImage(dataUrl, callback) {
+        const MAX_BYTES = 4.5 * 1024 * 1024; // 4.5MB to leave headroom
+        const img = new Image();
+        img.onload = () => {
+            // Check if already small enough
+            const base64Part = dataUrl.split(',')[1] || '';
+            if (base64Part.length * 0.75 <= MAX_BYTES) {
+                callback(dataUrl);
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            let { width, height } = img;
+
+            // Scale down until it fits, starting at 2000px max dimension
+            let maxDim = 2000;
+            let quality = 0.85;
+            let result = dataUrl;
+
+            function tryCompress() {
+                const scale = Math.min(1, maxDim / Math.max(width, height));
+                canvas.width = Math.round(width * scale);
+                canvas.height = Math.round(height * scale);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                result = canvas.toDataURL('image/jpeg', quality);
+
+                const b64 = result.split(',')[1] || '';
+                if (b64.length * 0.75 <= MAX_BYTES || maxDim <= 800) {
+                    callback(result);
+                } else {
+                    // Try smaller
+                    maxDim -= 300;
+                    quality = Math.max(0.6, quality - 0.05);
+                    tryCompress();
+                }
+            }
+            tryCompress();
+        };
+        img.src = dataUrl;
     }
 
     function clearImage() {
